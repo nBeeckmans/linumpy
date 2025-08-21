@@ -6,6 +6,7 @@ import nibabel as nib
 import os
 import numpy as np
 import dask.array as da
+import nrrd
 
 
 def get_data(name):
@@ -14,10 +15,23 @@ def get_data(name):
         "mosaic_3d_nifti": _get_mosaic_3d_nifti,
         "raw_tiles": _get_raw_tiles,
         "aip": _get_aip,
+        "mosaic_3d_nrrd": _get_mosaic_3d_nrrd,
     }
     if name not in data.keys():
         raise ValueError(f"Unknown key for data: {name}")
     return data[name]()
+
+
+def _get_mosaic_3d_nrrd():
+    _create_linumpy_home_if_not_exists()
+    filename = os.path.join(LINUMPY_HOME, "mosaic_3d.nii.gz")
+    if not os.path.exists(filename):
+        # create test data
+        data = np.mean(cells3d(), axis=1)  # (60, 256, 256)
+
+        nrrd.write(filename, data)
+
+        return filename
 
 
 def _create_linumpy_home_if_not_exists():
